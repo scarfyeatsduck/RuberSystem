@@ -18,11 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Ruber_System.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -49,5 +44,10 @@
     <None Include="models\warship.tri">
       <Filter>Resource Files\models</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="RuberSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
