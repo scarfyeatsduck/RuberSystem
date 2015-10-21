@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\models">
+      <UniqueIdentifier>{127b0b79-0d2a-43c3-986e-e16342c3d8fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\includes465">
+      <UniqueIdentifier>{4b58cc35-6fec-4e1d-91dd-85d07f50c26b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Missile.cpp">
@@ -32,23 +38,46 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="includes465\glmUtils465.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="includes465\include465.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="includes465\shader465.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="includes465\texture.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="includes465\triModel465.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="includes465\glmUtils465.hpp">
+      <Filter>Header Files\includes465</Filter>
+    </ClInclude>
+    <ClInclude Include="includes465\include465.hpp">
+      <Filter>Header Files\includes465</Filter>
+    </ClInclude>
+    <ClInclude Include="includes465\shader465.hpp">
+      <Filter>Header Files\includes465</Filter>
+    </ClInclude>
+    <ClInclude Include="includes465\texture.hpp">
+      <Filter>Header Files\includes465</Filter>
+    </ClInclude>
+    <ClInclude Include="includes465\triModel465.hpp">
+      <Filter>Header Files\includes465</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="models\duo.tri">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="models\missile.tri">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="models\primus.tri">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="models\ruber.tri">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="models\secundus.tri">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="models\unum.tri">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="models\warship.tri">
+      <Filter>Resource Files\models</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -158,6 +158,15 @@
     <ClInclude Include="includes465\triModel465.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="models\duo.tri" />
+    <None Include="models\missile.tri" />
+    <None Include="models\primus.tri" />
+    <None Include="models\ruber.tri" />
+    <None Include="models\secundus.tri" />
+    <None Include="models\unum.tri" />
+    <None Include="models\warship.tri" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
