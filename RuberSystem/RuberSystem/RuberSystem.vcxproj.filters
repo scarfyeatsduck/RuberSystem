@@ -50,4 +50,15 @@
       <Filter>Resource Files\models</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\freeglut.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
+    <Library Include="lib\glew32.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
+    <Library Include="lib\glew32s.lib">
+      <Filter>Resource Files</Filter>
+    </Library>
+  </ItemGroup>
 </Project>
