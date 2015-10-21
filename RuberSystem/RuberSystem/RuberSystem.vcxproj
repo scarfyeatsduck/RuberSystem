@@ -144,18 +144,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Missile.cpp" />
-    <ClCompile Include="Moon.cpp" />
-    <ClCompile Include="planet.cpp" />
     <ClCompile Include="Ruber_System.cpp" />
-    <ClCompile Include="warship.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="includes465\glmUtils465.hpp" />
-    <ClInclude Include="includes465\include465.hpp" />
-    <ClInclude Include="includes465\shader465.hpp" />
-    <ClInclude Include="includes465\texture.hpp" />
-    <ClInclude Include="includes465\triModel465.hpp" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
