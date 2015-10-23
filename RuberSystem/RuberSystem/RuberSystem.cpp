@@ -97,6 +97,9 @@ int cIndex = 0;
 // Movement Booleans
 bool movingForward = false, movingBackward = false, turningRight = false, turningLeft = false;
 
+// Alternate Controls Booleans
+bool ctrlPressed = false;
+
 // Timer Delay Variable
 int timerDelay = 40;
 // Timer Float Variable
@@ -315,6 +318,8 @@ void intervalTimer(int i) {
 //	STANDARD KEYBOARD INPUT
 void keyboard (unsigned char key, int x, int y) {
 	
+	if (debug) printf("Key Pressed: %c (code: %d)\nx: %d, y: %d\n", key, key, x, y);
+
 	switch (key) {
 		
 		case 033 : case 'q' : case 'Q' :
@@ -358,9 +363,39 @@ void keyboard (unsigned char key, int x, int y) {
 // SPECIAL KEY INPUT
 void special (int key, int x, int y) {
 	
-	if ((cIndex >= 2) && (cIndex <= 4)) {
+	if (debug) printf("Special Key Pressed: %d\nx: %d, y: %d\n", key, x, y);
+
+	if ((ctrlPressed)  && ((cIndex >= 2) && (cIndex <= 4))) {
 
 		switch (key) {
+
+		case GLUT_KEY_UP:
+			printf("Ctrl + Up pressed\n");
+			break;
+
+		case GLUT_KEY_DOWN:
+			printf("Ctrl + Down pressed\n");
+			break;
+
+		case GLUT_KEY_LEFT:
+			printf("Ctrl + Left pressed\n");
+			break;
+
+		case GLUT_KEY_RIGHT:
+			printf("Ctrl + Right pressed\n");
+			break;
+
+		}
+
+	}
+
+	else if ((cIndex >= 2) && (cIndex <= 4)) {
+
+		switch (key) {
+
+		case 114:
+			ctrlPressed = true;
+			break;
 
 		case GLUT_KEY_UP:
 			movingForward = true;
@@ -388,6 +423,10 @@ void special (int key, int x, int y) {
 void specialUp (int key, int x, int y) {
 
 	switch (key) {
+
+	case 114:
+		ctrlPressed = false;
+		break;
 
 	case GLUT_KEY_UP:
 		movingForward = false;
