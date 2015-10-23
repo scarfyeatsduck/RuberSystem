@@ -45,7 +45,7 @@ Moon * secundus = new Moon("models/secundus.tri", duo, -1750.0f, 0.006f);
 // Your Warbird
 Warship * warbird = new Warship("models/warship.tri");
 // A Missile
-Missile * missile = new Missile("models/missile.ttri");
+Missile * missile = new Missile("models/missile.tri");
 
 // Window Title Start String
 char startStr[25] = "Ruber System | Viewing: ";
