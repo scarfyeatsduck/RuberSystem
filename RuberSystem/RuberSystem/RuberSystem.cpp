@@ -321,7 +321,12 @@ void keyboard (unsigned char key, int x, int y) {
 			exit(EXIT_SUCCESS);
 			break;
 			
-		case 'c' : case 'C' :
+		case 'x' : case 'X' :
+			cIndex = (cIndex - 1) % nCameras;
+			if (cIndex == -1) cIndex = nCameras - 1;
+			break;
+
+		case 'v' : case 'V' :
 			cIndex = (cIndex + 1) % nCameras;
 			break;
 
@@ -352,24 +357,28 @@ void keyboard (unsigned char key, int x, int y) {
 
 // SPECIAL KEY INPUT
 void special (int key, int x, int y) {
+	
+	if ((cIndex >= 2) && (cIndex <= 4)) {
 
-	switch (key) {
+		switch (key) {
 
-	case GLUT_KEY_UP:
-		movingForward = true;
-		break;
+		case GLUT_KEY_UP:
+			movingForward = true;
+			break;
 
-	case GLUT_KEY_DOWN:
-		movingBackward = true;
-		break;
+		case GLUT_KEY_DOWN:
+			movingBackward = true;
+			break;
 
-	case GLUT_KEY_LEFT:
-		turningLeft = true;
-		break;
+		case GLUT_KEY_LEFT:
+			turningLeft = true;
+			break;
 
-	case GLUT_KEY_RIGHT:
-		turningRight = true;
-		break;
+		case GLUT_KEY_RIGHT:
+			turningRight = true;
+			break;
+
+		}
 
 	}
 
