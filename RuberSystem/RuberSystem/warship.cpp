@@ -14,7 +14,7 @@ public:
 	bool controllable = false;
 	
 	float turnSpeed = 0.05f;
-	float moveSpeed = 50.0f;
+	float moveSpeed = 10.0f;
 	
 	float radians;
 	glm::mat4 position;
@@ -147,6 +147,14 @@ public:
 		
 		position[3][0] -= (float) sin(radians) * moveSpeed; // x movement
 		position[3][2] -= (float) cos(radians) * moveSpeed; // z movement
+		
+	}
+	
+	void changeSpeed() {
+		
+		if (moveSpeed <= 10.0f) moveSpeed = 50.0f;
+		else if (moveSpeed <= 50.0f) moveSpeed = 200.0f;
+		else moveSpeed = 10.0f;
 		
 	}
 	

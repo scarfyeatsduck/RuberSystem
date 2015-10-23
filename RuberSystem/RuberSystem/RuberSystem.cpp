@@ -109,6 +109,8 @@ bool wireframe = false;
 //	INITIALIZE GL FUNCTIONS
 void init(void) {
 	
+	//Super secret code change
+
 	shaderProgram = loadShaders(vertexShaderFile, fragmentShaderFile);
 	glUseProgram(shaderProgram);
 
@@ -335,6 +337,13 @@ void keyboard (unsigned char key, int x, int y) {
 			unum->printLocation();
 			printf("Duo ");
 			duo->printLocation();
+			break;
+
+		case 's' : case 'S' :
+			warbird->changeSpeed();
+			break;
+
+		case 'k' : case 'K' :
 			break;
 		
 	}
