@@ -150,6 +150,8 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="customFragment.glsl" />
+    <None Include="customVertex.glsl" />
     <None Include="models\duo.tri" />
     <None Include="models\missile.tri" />
     <None Include="models\primus.tri" />
@@ -157,6 +159,13 @@
     <None Include="models\secundus.tri" />
     <None Include="models\unum.tri" />
     <None Include="models\warship.tri" />
+    <None Include="simpleFragment.glsl" />
+    <None Include="simpleVertex.glsl" />
+    <None Include="textures\duo.raw" />
+    <None Include="textures\primus.raw" />
+    <None Include="textures\ruber.raw" />
+    <None Include="textures\secundus.raw" />
+    <None Include="textures\unum.raw" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

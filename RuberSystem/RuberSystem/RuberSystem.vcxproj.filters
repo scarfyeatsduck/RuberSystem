@@ -16,6 +16,9 @@
     <Filter Include="Resource Files\models">
       <UniqueIdentifier>{127b0b79-0d2a-43c3-986e-e16342c3d8fd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\textures">
+      <UniqueIdentifier>{fb8ec972-8de2-41de-8940-a700ccef8dab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -43,6 +46,33 @@
     </None>
     <None Include="models\warship.tri">
       <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="textures\duo.raw">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\primus.raw">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\ruber.raw">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\secundus.raw">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="textures\unum.raw">
+      <Filter>Resource Files\textures</Filter>
+    </None>
+    <None Include="customFragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="customVertex.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="simpleFragment.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="simpleVertex.glsl">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
