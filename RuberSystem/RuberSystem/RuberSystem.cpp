@@ -160,7 +160,7 @@ void init(void) {
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", warbird->modelFile, warbird->boundingRadius);
 
-	MVP = glGetUniformLocation(shaderProgram, "ModelViewProject");
+	MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
 	warbird->setLocation(5000.0f, 1000.0f, 5000.0f);
 
