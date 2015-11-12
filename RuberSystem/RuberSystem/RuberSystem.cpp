@@ -22,6 +22,8 @@ Submitted by:
 
 // Is your program in debug mode?
 bool debug = true;
+// Are you using custom shaders?
+bool customShaders = false;
 
 // Viewport Info
 const int INITIAL_WIDTH = 800, INITIAL_HEIGHT = 600;
@@ -74,6 +76,10 @@ GLuint shaderProgram;
 char * vertexShaderFile = "simpleVertex.glsl";
 // The fragment shader file
 char * fragmentShaderFile = "simpleFragment.glsl";
+// The custom vertex shader file
+char * customVertexShaderFile = "customVertex.glsl";
+// The custom fragment shader file
+char * customFragmentShaderFile = "customFragment.glsl";
 // Model View Projection
 GLuint MVP;
 // The Projection Matrix
@@ -115,9 +121,9 @@ bool wireframe = false;
 //	INITIALIZE GL FUNCTIONS
 void init(void) {
 
-	//Super secret code change
-
-	shaderProgram = loadShaders(vertexShaderFile, fragmentShaderFile);
+	if (customShaders) shaderProgram = loadShaders(customVertexShaderFile, customFragmentShaderFile);
+	else shaderProgram = loadShaders(vertexShaderFile, fragmentShaderFile);
+	
 	glUseProgram(shaderProgram);
 
 	glGenVertexArrays(nModels, vao);
