@@ -1,11 +1,11 @@
 /*
-	
-	CS 465 Project 2
 
-	Submitted by:
-		-Stephen Morse
-		-Alexander Markarian
-		-Alden Parel
+CS 465 Project 2
+
+Submitted by:
+-Stephen Morse
+-Alexander Markarian
+-Alden Parel
 
 */
 
@@ -93,9 +93,12 @@ glm::vec3 eye, at, up; // Camera location, orientation
 int nCameras = 7;
 // The Camera Index
 int cIndex = 0;
+// The Warp Index
+int wIndex = 0;
 
 // Movement Booleans
 bool movingForward = false, movingBackward = false, turningRight = false, turningLeft = false;
+bool pitchForward = false, pitchBackward = false, rollRight = false, rollLeft = false;
 
 // Alternate Controls Booleans
 bool ctrlPressed = false;
@@ -111,7 +114,7 @@ bool wireframe = false;
 
 //	INITIALIZE GL FUNCTIONS
 void init(void) {
-	
+
 	//Super secret code change
 
 	shaderProgram = loadShaders(vertexShaderFile, fragmentShaderFile);
@@ -157,35 +160,72 @@ void init(void) {
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", warbird->modelFile, warbird->boundingRadius);
 
-	MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
+	MVP = glGetUniformLocation(shaderProgram, "ModelViewProject");
 
 	warbird->setLocation(5000.0f, 1000.0f, 5000.0f);
 
 	printf("eyeDistance = %3.3f\n", eyeDistance);
-	
+
 	eye = glm::vec3(0.0f, eyeDistance, eyeDistance);
-	at	= glm::vec3(0.0f, 0.0f, 0.0f);
-	up	= glm::vec3(0.0f, 1.0f, 0.0f);
-	
+	at = glm::vec3(0.0f, 0.0f, 0.0f);
+	up = glm::vec3(0.0f, 1.0f, 0.0f);
+
 	glEnable(GL_DEPTH_TEST);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	
+
 	lastTime = glutGet(GLUT_ELAPSED_TIME);
-	
+
+}
+
+//  WARP
+void warp(void) {
+
+	wIndex = (wIndex + 1) % 3;
+
+	if (wIndex == 1) {
+
+		warbird->setLocation(unum->getEye());
+		glm::vec3 right = unum->getAt();
+		right = glm::normalize(right);
+		glm::vec3 newUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 facing = unum->getAt() - unum->getEye();
+		facing = glm::normalize(facing);
+
+		warbird->setRotation(right, newUp, facing);
+
+	}
+	else if (wIndex == 2) {
+
+		warbird->setLocation(duo->getEye());
+		glm::vec3 right = duo->getAt();
+		right = glm::normalize(right);
+		glm::vec3 newUp = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 facing = duo->getAt() - duo->getEye();
+		facing = glm::normalize(facing);
+		warbird->setRotation(right, newUp, facing);
+
+	}
+	else {
+
+		warbird->setLocation(5000.0f, 1000.0f, 5000.0f);
+		warbird->resetRotation();
+
+	}
+
 }
 
 //	WINDOW RESIZE FUNCTION
 void reshape(int width, int height) {
-	
+
 	glViewport(0, 0, width, height);
-	aspectRatio = (GLfloat) width / (GLfloat) height;
-	projectionMatrix = glm::perspective(glm::radians(45.0f), (GLfloat) width /	(GLfloat) height, 1.0f, 100000.0f);
-	
+	aspectRatio = (GLfloat)width / (GLfloat)height;
+	projectionMatrix = glm::perspective(glm::radians(45.0f), (GLfloat)width / (GLfloat)height, 1.0f, 100000.0f);
+
 }
 
 //	DISPLAY FUNCTION
-void display (void) {
-	
+void display(void) {
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	viewMatrix = glm::lookAt(eye, at, up);
@@ -236,11 +276,11 @@ void display (void) {
 
 	currentTime = glutGet(GLUT_ELAPSED_TIME);
 	timeInterval = currentTime - lastTime;
-	
+
 }
 
 //	TITLE UPDATE FUNCTION
-void updateTitle (void) {
+void updateTitle(void) {
 
 	strcpy(titleStr, startStr);
 	strcat(titleStr, focusStr);
@@ -253,12 +293,17 @@ void updateTitle (void) {
 }
 
 //	UPDATE
-void update (void) {
+void update(void) {
 
 	if (movingForward) warbird->moveForward();
 	if (movingBackward) warbird->moveBackward();
 	if (turningLeft) warbird->turnLeft();
 	if (turningRight) warbird->turnRight();
+
+	if (pitchForward) warbird->tiltForward();
+	if (pitchBackward) warbird->tiltBackward();
+	if (rollRight) warbird->tiltRight();
+	if (rollLeft) warbird->tiltLeft();
 
 	ruber->update();
 	unum->update();
@@ -284,10 +329,12 @@ void update (void) {
 	case 2:
 		eye = warbird->getEye();
 		at = warbird->getAt();
+		up = warbird->getShipUp();
 		break;
 	case 3:
 		eye = warbird->getEyeAlt();
 		at = warbird->getAt();
+		up = warbird->getShipUp();
 		break;
 	case 4:
 		eye = warbird->getEyeTop();
@@ -316,73 +363,87 @@ void intervalTimer(int i) {
 }
 
 //	STANDARD KEYBOARD INPUT
-void keyboard (unsigned char key, int x, int y) {
-	
+void keyboard(unsigned char key, int x, int y) {
+
 	if (debug) printf("Key Pressed: %c (code: %d)\nx: %d, y: %d\n", key, key, x, y);
 
 	switch (key) {
-		
-		case 033 : case 'q' : case 'Q' :
-			exit(EXIT_SUCCESS);
-			break;
-			
-		case 'x' : case 'X' :
-			cIndex = (cIndex - 1) % nCameras;
-			if (cIndex == -1) cIndex = nCameras - 1;
-			break;
 
-		case 'v' : case 'V' :
-			cIndex = (cIndex + 1) % nCameras;
-			break;
+	case 033: case 'q': case 'Q':
+		exit(EXIT_SUCCESS);
+		break;
 
-		case 'd' : case 'D' :
-			printf("Camera Location:\n");
-			showVec3("Eye: ", eye);
-			showVec3("At: ", at);
-			showVec3("Up: ", up);
-			break;
+	case 'x': case 'X':
+		cIndex = (cIndex - 1) % nCameras;
+		if (cIndex == -1) cIndex = nCameras - 1;
+		break;
 
-		case 'b' : case 'B' :
-			printf("Unum ");
-			unum->printLocation();
-			printf("Duo ");
-			duo->printLocation();
-			break;
+	case 'v': case 'V':
+		cIndex = (cIndex + 1) % nCameras;
+		break;
 
-		case 's' : case 'S' :
-			warbird->changeSpeed();
-			break;
+	case 'd': case 'D':
+		printf("Warship Orientation:\n");
+		showMat4("Warbird: ", warbird->orientation);
+		printf("Camera Location:\n");
+		showVec3("Eye: ", eye);
+		showVec3("At: ", at);
+		showVec3("Up: ", up);
+		break;
 
-		case 'k' : case 'K' :
-			break;
-		
+	case 'b': case 'B':
+		printf("Unum ");
+		unum->printLocation();
+		printf("Duo ");
+		duo->printLocation();
+		break;
+
+	case 's': case 'S':
+		warbird->changeSpeed();
+		break;
+
+	case 'k': case 'K':
+		break;
+
+	case 'w': case 'W':
+		warp();
+		break;
+
+	case 'r': case 'R':
+		warbird->resetRotation();
+		break;
+
+	case 'g': case 'G':
+		//Toggle Gravity
+		break;
+
 	}
-	
+
 }
 
 // SPECIAL KEY INPUT
-void special (int key, int x, int y) {
-	
+void special(int key, int x, int y) {
+
 	if (debug) printf("Special Key Pressed: %d\nx: %d, y: %d\n", key, x, y);
 
-	if ((ctrlPressed)  && ((cIndex >= 2) && (cIndex <= 4))) {
+	if ((ctrlPressed) && ((cIndex >= 2) && (cIndex <= 4))) {
 
 		switch (key) {
 
 		case GLUT_KEY_UP:
-			printf("Ctrl + Up pressed\n");
+			pitchForward = true;
 			break;
 
 		case GLUT_KEY_DOWN:
-			printf("Ctrl + Down pressed\n");
+			pitchBackward = true;
 			break;
 
 		case GLUT_KEY_LEFT:
-			printf("Ctrl + Left pressed\n");
+			rollLeft = true;
 			break;
 
 		case GLUT_KEY_RIGHT:
-			printf("Ctrl + Right pressed\n");
+			rollRight = true;
 			break;
 
 		}
@@ -395,6 +456,10 @@ void special (int key, int x, int y) {
 
 		case 114:
 			ctrlPressed = true;
+			movingForward = false;
+			movingBackward = false;
+			turningLeft = false;
+			turningRight = false;
 			break;
 
 		case GLUT_KEY_UP:
@@ -420,28 +485,36 @@ void special (int key, int x, int y) {
 }
 
 // SPECIAL KEY UP FUNCTION
-void specialUp (int key, int x, int y) {
+void specialUp(int key, int x, int y) {
 
 	switch (key) {
 
 	case 114:
 		ctrlPressed = false;
+		pitchForward = false;
+		pitchBackward = false;
+		rollRight = false;
+		rollLeft = false;
 		break;
 
 	case GLUT_KEY_UP:
 		movingForward = false;
+		pitchForward = false;
 		break;
 
 	case GLUT_KEY_DOWN:
 		movingBackward = false;
+		pitchBackward = false;
 		break;
 
 	case GLUT_KEY_LEFT:
 		turningLeft = false;
+		rollLeft = false;
 		break;
 
 	case GLUT_KEY_RIGHT:
 		turningRight = false;
+		rollRight = false;
 		break;
 
 	}
@@ -449,33 +522,33 @@ void specialUp (int key, int x, int y) {
 }
 
 //	MAIN FUNCTION
-int main (int argc, char * argv[]) {
-	
+int main(int argc, char * argv[]) {
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(INITIAL_WIDTH,INITIAL_HEIGHT);
-	glutInitContextVersion(3,3);
+	glutInitWindowSize(INITIAL_WIDTH, INITIAL_HEIGHT);
+	glutInitContextVersion(3, 3);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutCreateWindow("Ruber System");
-	
+
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
-	
+
 	if (err != GLEW_OK) {
-		
+
 		printf("GLEW Error: %s\n", glewGetErrorString(err));
-		
+
 	}
 	else {
-		
+
 		printf("Using GLEW %s\n", glewGetString(GLEW_VERSION));
 		printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
 			glGetString(GL_SHADING_LANGUAGE_VERSION));
-		
+
 	}
-	
+
 	init();
-	
+
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
@@ -486,5 +559,5 @@ int main (int argc, char * argv[]) {
 	glutMainLoop();
 	printf("Processing Finished.\n");
 	return 0;
-	
+
 }
