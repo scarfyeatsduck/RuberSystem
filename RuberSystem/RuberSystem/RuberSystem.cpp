@@ -183,6 +183,13 @@ void init(void) {
 
 }
 
+//  SHOOT
+void shoot(void) {
+
+	//This is where the missile firing mechanics go.
+
+}
+
 //  WARP
 void warp(void) {
 
