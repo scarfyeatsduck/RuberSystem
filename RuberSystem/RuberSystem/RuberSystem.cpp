@@ -105,7 +105,7 @@ int wIndex = 0;
 // Movement Booleans
 bool movingForward = false, movingBackward = false, turningRight = false, turningLeft = false;
 bool pitchForward = false, pitchBackward = false, rollRight = false, rollLeft = false;
-bool gravityOn = false;
+bool gravityOn = false, gravity = false;
 
 // Alternate Controls Booleans
 bool ctrlPressed = false;
@@ -319,7 +319,8 @@ void update(void) {
 	if (rollRight) warbird->tiltRight();
 	if (rollLeft) warbird->tiltLeft();
 
-	if (gravityOn)warbird->gravityToggle();
+	//if (gravityOn)warbird->gravityToggle();
+	if (gravity) warbird->gMove();
 
 	ruber->update();
 	unum->update();
@@ -431,14 +432,8 @@ void keyboard(unsigned char key, int x, int y) {
 
 	case 'g': case 'G':
 		//Toggle Gravity
-		if (gravityOn) {
-			gravityOn = false;
-			printf("Gravity Off\n");
-		}
-		else {
-			gravityOn = true;
-			printf("Gravity On\n");
-		}
+		//gravityOn = !gravityOn;
+		gravity = !gravity;
 		break;
 
 	}

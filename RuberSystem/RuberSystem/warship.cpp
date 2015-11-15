@@ -245,6 +245,23 @@ public:
 		else moveSpeed = 10.0f;
 
 	}
+	
+	void gMove () {
+		
+		glm::vec3 pVec = getPosition(position);
+		glm::vec3 origin = glm::vec3(0);
+		float g = 90000000.0f / pow(distance(pVec,origin), 2);
+		
+		glm::mat4 gPull = glm::mat4();
+		pVec = normalize(pVec);
+		
+		gPull[3][0] = -pVec[0] * g;
+		gPull[3][1] = -pVec[1] * g;
+		gPull[3][2] = -pVec[2] * g;
+		
+		position = gPull * position;
+		
+	}
 
 	void gravityToggle() {
 		glm::mat4 gravity = glm::mat4();
