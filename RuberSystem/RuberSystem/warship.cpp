@@ -246,4 +246,14 @@ public:
 
 	}
 
+	void gravityToggle() {
+		glm::mat4 gravity = glm::mat4();
+		gravity[0][0] = (float)cos(turnSpeed);
+		gravity[0][2] = -1.0f * (float)sin(turnSpeed);
+		gravity[2][0] = (float)sin(turnSpeed);
+		gravity[2][2] = (float)cos(turnSpeed);
+
+		rotation = rotation * gravity;
+	}
+
 };
