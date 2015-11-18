@@ -14,7 +14,7 @@ Submitted by:
 # include "Planet.cpp"
 # include "Moon.cpp"
 # include "Warship.cpp"
-# include "Missile.cpp"
+//# include "Missile.cpp"
 
 //	DEFINITIONS
 //	
@@ -33,7 +33,7 @@ bool perspective = true;
 GLfloat aspectRatio;
 
 // Number of models to be loaded
-const int nModels = 7;
+const int nModels = 6;
 // Ruber, the star
 Planet * ruber = new Planet("models/ruber.tri", 0.0f, 0.0f);
 // Unum, the first planet
@@ -47,7 +47,7 @@ Moon * secundus = new Moon("models/secundus.tri", duo, -1750.0f, 0.006f);
 // Your Warbird
 Warship * warbird = new Warship("models/warship.tri");
 // A Missile
-Missile * missile = new Missile("models/missile.tri");
+//Missile * missile = new Missile("models/missile.tri");
 
 // Window Title Start String
 char startStr[25] = "Ruber System | Viewing: ";
