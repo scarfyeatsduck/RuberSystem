@@ -12,23 +12,29 @@ Mike Barnes
 */
 
 # version 330 core
-        
-in  vec4 vsColor;
-out vec4 color;
-        
-in vec3 vs_worldpos;
-in vec3 vs_normal;
-        
-// define light propoerties
-uniform vec4 color_ambient = vec4(0.1, 0.1, 0.1, 1.0);
-uniform vec4 color_diffuse = vec4(0.7, 0.7, 0.7, 1.0);
-        
-uniform vec3 light_position = vec3(0.0f, 0.0f, 1500.0f); 
 
-void main(void) {
-   float ambient = 1.0f;   // scale the ambient light 
-   vec3 light_direction = normalize(light_position - vs_worldpos);
-   vec3 normal = normalize(vs_normal);
-   float diffuse = max(0.0, dot(normal, light_direction));
-   color = ambient * color_ambient + diffuse * vsColor;
-   }
+in vec3 Position;
+in vec3 Normal;
+in vec4 Color;
+
+uniform vec3 PointLightPosition;
+uniform vec3 PointLightIntensity;
+uniform float AmbientIntensity;
+
+out vec4 FragColor;
+
+vec3 vLight (vec3 LightPosition, vec3 LightIntensity) {
+   
+   vec3 n = normalize(Normal), s = normalize(LightPosition - Position);
+   float diffuse = max(dot(s,n), 0.0);
+   
+   return diffuse * LightIntensity;
+   
+}
+
+void main (void) {
+
+   vec3 TempColor = vec3(Color) * AmbientIntensity;
+   TempColor += vLight(PointLightPosition, PointLightIntensity);
+   FragColor = vec4(TempColor, 1.0f);   
+}

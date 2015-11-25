@@ -23,7 +23,7 @@ Submitted by:
 // Is your program in debug mode?
 bool debug = true;
 // Are you using custom shaders?
-bool customShaders = false;
+bool customShaders = true;
 
 // Viewport Info
 const int INITIAL_WIDTH = 800, INITIAL_HEIGHT = 600;
@@ -49,6 +49,9 @@ Warship * warbird = new Warship("models/warship.tri");
 // A Missile
 //Missile * missile = new Missile("models/missile.tri");
 
+//
+char * ruberTexture = "";
+
 // Window Title Start String
 char startStr[25] = "Ruber System | Viewing: ";
 // Window Title Camera Focus String
@@ -64,7 +67,10 @@ char titleStr[100];
 GLuint vao[nModels];
 
 // The Vertex Buffer Objects
-GLuint buffer[nModels];
+GLuint vbo[nModels];
+
+// The Index Buffer Objects
+GLuint ibo[nModels];
 
 // The Model Buffer Vertices
 GLuint vPosition[nModels], vColor[nModels], vNormal[nModels];
@@ -81,15 +87,26 @@ char * customVertexShaderFile = "customVertex.glsl";
 // The custom fragment shader file
 char * customFragmentShaderFile = "customFragment.glsl";
 // Model View Projection
-GLuint MVP;
+GLuint NormalMatrix, MVP;
 // The Projection Matrix
 glm::mat4 projectionMatrix;
 // The Model Matrix
 glm::mat4 modelMatrix;
 // The View Matrix
 glm::mat4 viewMatrix;
+// The normal Matrix
+glm::mat3 normalMatrix;
 // The final MVP Matrix
 glm::mat4 ModelViewProjectionMatrix;
+
+// Light Vars
+GLuint PLP, PLI, Amb;
+// Point Light Position
+glm::vec3 PointLightPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+// Point Light Intensity
+glm::vec3 PointLightIntensity = glm::vec3(1.0f, 1.0f, 1.0f);
+// Ambient Intensity
+float AmbientIntensity = 0.1f;
 
 // Camera Distance from object
 float eyeDistance = 20000.0f;
@@ -126,48 +143,56 @@ void init(void) {
 	else shaderProgram = loadShaders(vertexShaderFile, fragmentShaderFile);
 	
 	glUseProgram(shaderProgram);
+	NormalMatrix = glGetUniformLocation(shaderProgram, "NormalMatrix");
+	MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
 	glGenVertexArrays(nModels, vao);
-	glGenBuffers(nModels, buffer);
+	glGenBuffers(nModels, vbo);
+	glGenBuffers(nModels, ibo);
 
 	// Load Models
 	int mIndex = 0;
 	ruber->boundingRadius = loadModelBuffer(ruber->modelFile, ruber->nVertices,
-		vao[mIndex], buffer[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", ruber->modelFile, ruber->boundingRadius);
 
 	mIndex++;
 	unum->boundingRadius = loadModelBuffer(unum->modelFile, unum->nVertices,
-		vao[mIndex], buffer[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", unum->modelFile, unum->boundingRadius);
 
 	mIndex++;
 	duo->boundingRadius = loadModelBuffer(duo->modelFile, duo->nVertices,
-		vao[mIndex], buffer[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", duo->modelFile, duo->boundingRadius);
 
 	mIndex++;
 	primus->boundingRadius = loadModelBuffer(primus->modelFile, primus->nVertices,
-		vao[mIndex], buffer[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", primus->modelFile, primus->boundingRadius);
 
 	mIndex++;
 	secundus->boundingRadius = loadModelBuffer(secundus->modelFile, secundus->nVertices,
-		vao[mIndex], buffer[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", secundus->modelFile, secundus->boundingRadius);
 
 	mIndex++;
 	warbird->boundingRadius = loadModelBuffer(warbird->modelFile, warbird->nVertices,
-		vao[mIndex], buffer[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
 	printf("Loaded Model: %s with %7.2f bounding radius \n", warbird->modelFile, warbird->boundingRadius);
 
-	MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
+	PLP = glGetUniformLocation(shaderProgram, "PointLightPosition");
+	if (PLP != -1) glUniform3f(PLP, PointLightPosition[0], PointLightPosition[1], PointLightPosition[2]);
+	PLI = glGetUniformLocation(shaderProgram, "PointLightIntensity");
+	if (PLI != -1) glUniform3f(PLI, PointLightIntensity[0], PointLightIntensity[1], PointLightIntensity[2]);
+	Amb = glGetUniformLocation(shaderProgram, "AmbientIntensity");
+	if (Amb != -1) glUniform1f(Amb, AmbientIntensity);
 
 	warbird->setLocation(5000.0f, 1000.0f, 5000.0f);
 
@@ -246,44 +271,62 @@ void display(void) {
 
 	int mIndex = 0;
 	modelMatrix = ruber->getModelMatrix();
+	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, ruber->nVertices);
 
 	mIndex++;
 	modelMatrix = unum->getModelMatrix();
+	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, unum->nVertices);
 
 	mIndex++;
 	modelMatrix = duo->getModelMatrix();
+	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, duo->nVertices);
 
 	mIndex++;
 	modelMatrix = primus->getModelMatrix();
+	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, primus->nVertices);
 
 	mIndex++;
 	modelMatrix = secundus->getModelMatrix();
+	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, secundus->nVertices);
 
 	mIndex++;
 	modelMatrix = warbird->getModelMatrix();
+	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, warbird->nVertices);
 
 	glutSwapBuffers();

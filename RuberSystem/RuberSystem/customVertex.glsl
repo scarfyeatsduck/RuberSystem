@@ -11,22 +11,20 @@ Mike Barnes
 
 # version 330 core
         
-layout (location = 0) in vec4 vPosition;
-layout (location = 1) in vec4 vColor;
-layout (location = 2) in vec3 vNormal;
+in vec4 vPosition;
+in vec4 vColor;
+in vec3 vNormal;
 
 uniform mat3 NormalMatrix;
 uniform mat4 ModelViewProjection;
-  
-out vec4 vsColor;      
-out vec3 vs_worldpos;
-out vec3 vs_normal;
-        
+
+out vec3 Position;
+out vec3 Normal;
+out vec4 Color;
+
 void main(void) {
-  vec4 position = ModelViewProjection * vPosition;
-  gl_Position = position;
-  vs_worldpos = position.xyz;
-  vs_normal = NormalMatrix * vNormal; 
-  vsColor = vColor;
+  Position = (ModelViewProjection * vPosition).xyz;
+  Normal = normalize(NormalMatrix * vNormal);
+  Color = vColor;
   }
  
