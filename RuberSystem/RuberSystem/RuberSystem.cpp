@@ -23,7 +23,7 @@ Submitted by:
 // Is your program in debug mode?
 bool debug = true;
 // Are you using custom shaders?
-bool customShaders = false;
+bool customShaders = true;
 
 // Viewport Info
 const int INITIAL_WIDTH = 800, INITIAL_HEIGHT = 600;
@@ -69,9 +69,6 @@ GLuint vao[nModels];
 // The Vertex Buffer Objects
 GLuint vbo[nModels];
 
-// The Index Buffer Objects
-GLuint ibo[nModels];
-
 // The Model Buffer Vertices
 GLuint vPosition[nModels], vColor[nModels], vNormal[nModels];
 
@@ -87,7 +84,7 @@ char * customVertexShaderFile = "customVertex.glsl";
 // The custom fragment shader file
 char * customFragmentShaderFile = "customFragment.glsl";
 // Model View Projection
-GLuint NormalMatrix, MVP;
+GLuint NM, MVP;
 // The Projection Matrix
 glm::mat4 projectionMatrix;
 // The Model Matrix
@@ -102,11 +99,13 @@ glm::mat4 ModelViewProjectionMatrix;
 // Light Vars
 GLuint PLP, PLI, Amb;
 // Point Light Position
-glm::vec3 PointLightPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-// Point Light Intensity
-glm::vec3 PointLightIntensity = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::mat4 PointLightOrientation = glm::mat4();
+glm::vec3 PointLightPosition;
 // Ambient Intensity
-float AmbientIntensity = 0.1f;
+glm::vec3 AmbientIntensity = glm::vec3(0.1f);
+// Point Light Intensity
+glm::vec3 PointLightIntensity = glm::vec3(1.0f, 1.0f, 1.0f) - AmbientIntensity;
+
 
 // Camera Distance from object
 float eyeDistance = 20000.0f;
@@ -143,12 +142,11 @@ void init(void) {
 	else shaderProgram = loadShaders(vertexShaderFile, fragmentShaderFile);
 	
 	glUseProgram(shaderProgram);
-	NormalMatrix = glGetUniformLocation(shaderProgram, "NormalMatrix");
+	NM = glGetUniformLocation(shaderProgram, "NormalMatrix");
 	MVP = glGetUniformLocation(shaderProgram, "ModelViewProjection");
 
 	glGenVertexArrays(nModels, vao);
 	glGenBuffers(nModels, vbo);
-	glGenBuffers(nModels, ibo);
 
 	// Load Models
 	int mIndex = 0;
@@ -188,11 +186,8 @@ void init(void) {
 	printf("Loaded Model: %s with %7.2f bounding radius \n", warbird->modelFile, warbird->boundingRadius);
 
 	PLP = glGetUniformLocation(shaderProgram, "PointLightPosition");
-	if (PLP != -1) glUniform3f(PLP, PointLightPosition[0], PointLightPosition[1], PointLightPosition[2]);
 	PLI = glGetUniformLocation(shaderProgram, "PointLightIntensity");
-	if (PLI != -1) glUniform3f(PLI, PointLightIntensity[0], PointLightIntensity[1], PointLightIntensity[2]);
 	Amb = glGetUniformLocation(shaderProgram, "AmbientIntensity");
-	if (Amb != -1) glUniform1f(Amb, AmbientIntensity);
 
 	warbird->setLocation(5000.0f, 1000.0f, 5000.0f);
 
@@ -269,64 +264,69 @@ void display(void) {
 
 	viewMatrix = glm::lookAt(eye, at, up);
 
+	PointLightPosition = getPosition(viewMatrix * PointLightOrientation);
+	glUniform3fv(PLP, 1, glm::value_ptr(PointLightPosition));
+	glUniform3fv(PLI, 1, glm::value_ptr(PointLightIntensity));
+	glUniform3fv(Amb, 1, glm::value_ptr(AmbientIntensity));
+
 	int mIndex = 0;
-	modelMatrix = ruber->getModelMatrix();
-	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
-	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
+	modelMatrix = ruber->getModelMatrix();
+	normalMatrix = glm::mat3(viewMatrix * modelMatrix);
+	glUniformMatrix3fv(NM, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glDrawArrays(GL_TRIANGLES, 0, ruber->nVertices);
 
 	mIndex++;
-	modelMatrix = unum->getModelMatrix();
-	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
-	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
+	modelMatrix = unum->getModelMatrix();
+	normalMatrix = glm::mat3(viewMatrix * modelMatrix);
+	glUniformMatrix3fv(NM, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glDrawArrays(GL_TRIANGLES, 0, unum->nVertices);
 
 	mIndex++;
-	modelMatrix = duo->getModelMatrix();
-	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
-	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
+	modelMatrix = duo->getModelMatrix();
+	normalMatrix = glm::mat3(viewMatrix * modelMatrix);
+	glUniformMatrix3fv(NM, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glDrawArrays(GL_TRIANGLES, 0, duo->nVertices);
 
 	mIndex++;
-	modelMatrix = primus->getModelMatrix();
-	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
-	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
+	modelMatrix = primus->getModelMatrix();
+	normalMatrix = glm::mat3(viewMatrix * modelMatrix);
+	glUniformMatrix3fv(NM, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glDrawArrays(GL_TRIANGLES, 0, primus->nVertices);
 
 	mIndex++;
-	modelMatrix = secundus->getModelMatrix();
-	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
-	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
+	modelMatrix = secundus->getModelMatrix();
+	normalMatrix = glm::mat3(viewMatrix * modelMatrix);
+	glUniformMatrix3fv(NM, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glDrawArrays(GL_TRIANGLES, 0, secundus->nVertices);
 
 	mIndex++;
-	modelMatrix = warbird->getModelMatrix();
-	normalMatrix = glm::mat3(modelMatrix * viewMatrix);
-	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
-	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glBindVertexArray(vao[mIndex]);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo[mIndex]);
+	modelMatrix = warbird->getModelMatrix();
+	normalMatrix = glm::mat3(viewMatrix * modelMatrix);
+	glUniformMatrix3fv(NM, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
 	glDrawArrays(GL_TRIANGLES, 0, warbird->nVertices);
 
 	glutSwapBuffers();
@@ -479,6 +479,9 @@ void keyboard(unsigned char key, int x, int y) {
 		gravity = !gravity;
 		break;
 
+	case 'p': case 'P':
+		showVec3("Point Light Position", PointLightPosition);
+		break;
 	}
 
 }
