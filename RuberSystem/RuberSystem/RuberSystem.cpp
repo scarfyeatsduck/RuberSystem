@@ -23,7 +23,7 @@ Submitted by:
 // Is your program in debug mode?
 bool debug = true;
 // Are you using custom shaders?
-bool customShaders = true;
+bool customShaders = false;
 
 // Viewport Info
 const int INITIAL_WIDTH = 800, INITIAL_HEIGHT = 600;
