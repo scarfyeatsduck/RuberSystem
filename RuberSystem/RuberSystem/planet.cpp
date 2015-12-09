@@ -7,18 +7,18 @@
 class Planet {
 
 private:
-
+	
 	const double SPEED = 1.0;
-
+	
 	float distance;
 	float cModifier;
 	float orbitRadians;
-
+	
 	glm::mat4 position;
 	glm::mat4 rotation;
 	glm::mat4 orientation;
 	glm::mat4 camera;
-
+	
 public:
 
 	char * modelFile;

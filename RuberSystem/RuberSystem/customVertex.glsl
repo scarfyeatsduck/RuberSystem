@@ -4,7 +4,7 @@ layout (location = 0) in vec4 vPosition;
 layout (location = 1) in vec4 vColor;
 layout (location = 2) in vec3 vNormal;
 
-uniform mat3 NormalMatrix;
+uniform mat4 ModelView;
 uniform mat4 ModelViewProjection;
 
 uniform vec3 PointLightPosition;
@@ -21,7 +21,9 @@ out vec3 Amb;
 
 void main(void) {
 	
-	position = (ModelViewProjection * vPosition).xyz;
+	mat3 NormalMatrix = mat3(ModelView);
+	
+	position = vec3(ModelView * vPosition);
 	normal = NormalMatrix * vNormal;
 	color = vColor;
 	
