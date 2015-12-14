@@ -57,6 +57,8 @@ public:
 	void printLocation() {
 
 		showMat4("Orientation", orientation);
+		
+		return;
 
 	}
 
@@ -107,6 +109,12 @@ public:
 		return (float)sin(((double)glutGet(GLUT_ELAPSED_TIME) * 0.025f * orbitRadians * SPEED));
 
 	}
+	
+	float getRadians() {
+		
+		return glutGet(GLUT_ELAPSED_TIME) * 0.025f * orbitRadians * SPEED;
+		
+	}
 
 	void update() {
 
@@ -116,7 +124,17 @@ public:
 		rotation = rotate(glm::mat4(), (float)(-glutGet(GLUT_ELAPSED_TIME) * 0.025f * orbitRadians * SPEED), glm::vec3(0.0f, 1.0f, 0.0f));
 
 		orientation = position * rotation;
+		
+		return;
 
+	}
+	
+	int flipCheck (void) {
+		
+		if (distance < 0.0f) return -1;
+		
+		else return 1;
+		
 	}
 
 };

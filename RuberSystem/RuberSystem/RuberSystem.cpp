@@ -7,6 +7,16 @@ Submitted by:
 -Alexander Markarian
 -Alden Parel
 
+Working:
+-All Project 1 features
+-Project 2 features:
+	-Ship movement (forward, back, yaw, pitch, roll, speed variability)
+	-Missiles target missile sites correctly and disappear on contact with the missile site or a planet
+	-Warping is fully functional
+	-Gravity is fully functional
+Project 3 features:
+	-Light source (ruber) lights planets correctly
+
 */
 
 # define __Windows__
@@ -14,7 +24,8 @@ Submitted by:
 # include "Planet.cpp"
 # include "Moon.cpp"
 # include "Warship.cpp"
-//# include "Missile.cpp"
+# include "missileSite.cpp"
+# include "Missile.cpp"
 
 //	DEFINITIONS
 //	
@@ -33,7 +44,7 @@ bool perspective = true;
 GLfloat aspectRatio;
 
 // Number of models to be loaded
-const int nModels = 6;
+const int nModels = 9;
 // Ruber, the star
 Planet * ruber = new Planet("models/ruber.tri", 0.0f, 0.0f);
 // Unum, the first planet
@@ -46,11 +57,15 @@ Moon * primus = new Moon("models/primus.tri", duo, 900.0f, 0.01f);
 Moon * secundus = new Moon("models/secundus.tri", duo, -1750.0f, 0.006f);
 // Your Warbird
 Warship * warbird = new Warship("models/warship.tri");
+// Missile Site 1
+MissileSite * unumSite = new MissileSite("models/missileSite.tri", unum);
+// Missile Site 2
+MissileSite * duoSite = new MissileSite("models/missileSite.tri", duo);
 // A Missile
-//Missile * missile = new Missile("models/missile.tri");
+Missile * missile = new Missile("models/missile.tri", ruber, unum, duo, unumSite, duoSite);
+// Is the player's missile live?
+bool isMissile = false;
 
-//
-char * ruberTexture = "";
 
 // Window Title Start String
 char startStr[25] = "Ruber System | Viewing: ";
@@ -97,7 +112,7 @@ glm::mat4 modelView;
 glm::mat4 ModelViewProjectionMatrix;
 
 // Light Vars
-GLuint PLP, PLI, Amb;
+GLuint PLP, PLI, Amb, Lum;
 // Point Light Position
 glm::mat4 PointLightOrientation = glm::mat4();
 glm::vec3 PointLightPosition;
@@ -105,7 +120,7 @@ glm::vec3 PointLightPosition;
 glm::vec3 AmbientIntensity = glm::vec3(0.1f);
 // Point Light Intensity
 glm::vec3 PointLightIntensity = glm::vec3(1.0f, 1.0f, 1.0f) - AmbientIntensity;
-
+int luminous[nModels] = {1, 0, 0, 0, 0, 0, 0, 0, 1};
 
 // Camera Distance from object
 float eyeDistance = 20000.0f;
@@ -153,44 +168,66 @@ void init(void) {
 	ruber->boundingRadius = loadModelBuffer(ruber->modelFile, ruber->nVertices,
 		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
-	printf("Loaded Model: %s with %7.2f bounding radius \n", ruber->modelFile, ruber->boundingRadius);
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", ruber->modelFile, ruber->boundingRadius);
 
 	mIndex++;
 	unum->boundingRadius = loadModelBuffer(unum->modelFile, unum->nVertices,
 		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
-	printf("Loaded Model: %s with %7.2f bounding radius \n", unum->modelFile, unum->boundingRadius);
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", unum->modelFile, unum->boundingRadius);
 
 	mIndex++;
 	duo->boundingRadius = loadModelBuffer(duo->modelFile, duo->nVertices,
 		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
-	printf("Loaded Model: %s with %7.2f bounding radius \n", duo->modelFile, duo->boundingRadius);
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", duo->modelFile, duo->boundingRadius);
 
 	mIndex++;
 	primus->boundingRadius = loadModelBuffer(primus->modelFile, primus->nVertices,
 		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
-	printf("Loaded Model: %s with %7.2f bounding radius \n", primus->modelFile, primus->boundingRadius);
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", primus->modelFile, primus->boundingRadius);
 
 	mIndex++;
 	secundus->boundingRadius = loadModelBuffer(secundus->modelFile, secundus->nVertices,
 		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
-	printf("Loaded Model: %s with %7.2f bounding radius \n", secundus->modelFile, secundus->boundingRadius);
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", secundus->modelFile, secundus->boundingRadius);
 
 	mIndex++;
 	warbird->boundingRadius = loadModelBuffer(warbird->modelFile, warbird->nVertices,
 		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
 		"vPosition", "vColor", "vNormal");
-	printf("Loaded Model: %s with %7.2f bounding radius \n", warbird->modelFile, warbird->boundingRadius);
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", warbird->modelFile, warbird->boundingRadius);
+
+	mIndex++;
+	unumSite->boundingRadius = loadModelBuffer(unumSite->modelFile, unumSite->nVertices,
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		"vPosition", "vColor", "vNormal");
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", unumSite->modelFile, unumSite->boundingRadius);
+	unumSite->getSurface();
+
+	mIndex++;
+	duoSite->boundingRadius = loadModelBuffer(duoSite->modelFile, duoSite->nVertices,
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		"vPosition", "vColor", "vNormal");
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", duoSite->modelFile, duoSite->boundingRadius);
+	duoSite->getSurface();
+	
+
+	mIndex++;
+	missile->boundingRadius = loadModelBuffer(missile->modelFile, missile->nVertices,
+		vao[mIndex], vbo[mIndex], shaderProgram, vPosition[mIndex], vColor[mIndex], vNormal[mIndex],
+		"vPosition", "vColor", "vNormal");
+	//printf("Loaded Model: %s with %7.2f bounding radius \n", missile->modelFile, missile->boundingRadius);
 
 	PLP = glGetUniformLocation(shaderProgram, "PointLightPosition");
 	PLI = glGetUniformLocation(shaderProgram, "PointLightIntensity");
 	Amb = glGetUniformLocation(shaderProgram, "AmbientIntensity");
+	Lum = glGetUniformLocation(shaderProgram, "Luminous");
 
 	warbird->setLocation(5000.0f, 1000.0f, 5000.0f);
-	warbird->spin(5 * PI / 4);
+	warbird->spin(3 * PI / 4);
 
 	printf("eyeDistance = %3.3f\n", eyeDistance);
 
@@ -208,7 +245,23 @@ void init(void) {
 //  SHOOT
 void shoot(void) {
 
-	//This is where the missile firing mechanics go.
+	if (isMissile) return;
+
+	isMissile = true;
+
+	printf("Missile Button Pressed.\n");
+	
+	glm::mat4 pos = glm::mat4();
+	pos[3][2] = 100.0f;
+	pos = warbird->rotation * pos;
+
+	glm::vec3 direction = getPosition(pos);
+	pos = warbird->position;
+	pos = glm::translate(pos,direction);
+
+	missile->init(pos,warbird->rotation);
+	
+	return;
 
 }
 
@@ -220,39 +273,28 @@ void warp(void) {
 	if (wIndex == 1) {
 
 		warbird->setLocation(unum->getEye());
-		glm::vec3 right = unum->getAt();
-		right = glm::normalize(right);
-		glm::vec3 newUp = glm::vec3(0.0f, 1.0f, 0.0f);
-		glm::vec3 facing = unum->getAt() - unum->getEye();
-		facing = glm::normalize(facing);
 
-		//warbird->setRotation(right, newUp, facing);
 		warbird->resetRotation();
-		//warbird->
+		float spinZero = PI / 2;
+		warbird->spin(spinZero + unum->getRadians());
+		warbird->spin(spinZero);
 
 	}
 	else if (wIndex == 2) {
 
 		warbird->setLocation(duo->getEye());
-		/*
-		glm::vec3 right = duo->getAt();
-		right = glm::normalize(right);
-		glm::vec3 newUp = glm::vec3(0.0f, 1.0f, 0.0f);
-		glm::vec3 facing = duo->getAt() - duo->getEye();
-		facing = glm::normalize(facing);
-		*/
-
-		//warbird->setRotation(right, newUp, facing);
+		
 		warbird->resetRotation();
-		//Spin to face duo
-		float spinRadians = PI;
-
+		float spinZero = 0.0f;
+		warbird->spin(spinZero + duo->getRadians());
+		warbird->spin(spinZero);
+		
 	}
 	else {
 
 		warbird->setLocation(5000.0f, 1000.0f, 5000.0f);
 		warbird->resetRotation();
-		warbird->spin(5 * PI / 4);
+		warbird->spin(3 * PI / 4);
 
 	}
 
@@ -287,6 +329,7 @@ void display(void) {
 	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, ruber->nVertices);
 
 	mIndex++;
@@ -297,6 +340,7 @@ void display(void) {
 	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, unum->nVertices);
 
 	mIndex++;
@@ -307,6 +351,7 @@ void display(void) {
 	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, duo->nVertices);
 
 	mIndex++;
@@ -317,6 +362,7 @@ void display(void) {
 	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, primus->nVertices);
 
 	mIndex++;
@@ -327,6 +373,7 @@ void display(void) {
 	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, secundus->nVertices);
 
 	mIndex++;
@@ -337,7 +384,45 @@ void display(void) {
 	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
 	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
 	glDrawArrays(GL_TRIANGLES, 0, warbird->nVertices);
+
+	mIndex++;
+	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	modelMatrix = unumSite->getModelMatrix();
+	modelView = viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
+	glDrawArrays(GL_TRIANGLES, 0, unumSite->nVertices);
+
+	mIndex++;
+	glBindVertexArray(vao[mIndex]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+	modelMatrix = duoSite->getModelMatrix();
+	modelView = viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
+	ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+	glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+	glUniform1i(Lum, luminous[mIndex]);
+	glDrawArrays(GL_TRIANGLES, 0, duoSite->nVertices);
+
+	if (isMissile) {
+
+		mIndex++;
+		glBindVertexArray(vao[mIndex]);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo[mIndex]);
+		modelMatrix = missile->getModelMatrix();
+		modelView = viewMatrix * modelMatrix;
+		glUniformMatrix4fv(MV, 1, GL_FALSE, glm::value_ptr(modelView));
+		ModelViewProjectionMatrix = projectionMatrix * viewMatrix * modelMatrix;
+		glUniformMatrix4fv(MVP, 1, GL_FALSE, glm::value_ptr(ModelViewProjectionMatrix));
+		glUniform1i(Lum, luminous[mIndex]);
+		glDrawArrays(GL_TRIANGLES, 0, missile->nVertices);
+
+	}
 
 	glutSwapBuffers();
 
@@ -372,7 +457,6 @@ void update(void) {
 	if (rollRight) warbird->tiltRight();
 	if (rollLeft) warbird->tiltLeft();
 
-	//if (gravityOn)warbird->gravityToggle();
 	if (gravity) warbird->gMove();
 
 	ruber->update();
@@ -381,6 +465,11 @@ void update(void) {
 	primus->update();
 	secundus->update();
 	warbird->update();
+	unumSite->update();
+	duoSite->update();
+
+	if (isMissile) if (!missile->update()) isMissile = false;
+
 	updateTitle();
 
 	up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -472,6 +561,10 @@ void keyboard(unsigned char key, int x, int y) {
 		warbird->changeSpeed();
 		break;
 
+	case 'f': case 'F':
+		shoot();
+		break;
+
 	case 'k': case 'K':
 		break;
 
@@ -490,7 +583,9 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 
 	case 'p': case 'P':
-		showVec3("Point Light Position", PointLightPosition);
+		printf("ms: %3.3f\n", (float)(0.001f * glutGet(GLUT_ELAPSED_TIME)));
+		printf("Unum radians: PI * %3.3f\n", unum->getRadians() / PI);
+		printf("Duo radians: PI * %3.3f\n", duo->getRadians() / PI);
 		break;
 	}
 

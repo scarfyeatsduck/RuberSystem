@@ -84,7 +84,7 @@ public:
 	
 	void spin (float radians) {
 		
-		rotation = rotate(rotation, radians, glm::vec3(0, 1, 0));
+		rotation = rotate(rotation, -radians, glm::vec3(0, 1, 0));
 		
 	}
 	
@@ -143,113 +143,113 @@ public:
 	}
 	
 	glm::vec3 getForward() {
-
+		
 		return getOut(orientation);
-
+		
 	}
 
 	void turnRight() {
-
+		
 		glm::mat4 turn = glm::mat4();
 		turn[0][0] = (float)cos(turnSpeed);
 		turn[0][2] = (float)sin(turnSpeed);
 		turn[2][0] = -1.0f * (float)sin(turnSpeed);
 		turn[2][2] = (float)cos(turnSpeed);
-
+		
 		rotation = rotation * turn;
-
+		
 	}
 
 	void turnLeft() {
-
+		
 		glm::mat4 turn = glm::mat4();
 		turn[0][0] = (float)cos(turnSpeed);
 		turn[0][2] = -1.0f * (float)sin(turnSpeed);
 		turn[2][0] = (float)sin(turnSpeed);
 		turn[2][2] = (float)cos(turnSpeed);
-
+		
 		rotation = rotation * turn;
-
+		
 	}
 
 	void moveForward() {
-
+		
 		glm::mat4 move = glm::mat4();
 		move[3][2] = moveSpeed;
 		move = rotation * move;
-
+		
 		position[3][0] += move[3][0];
 		position[3][1] += move[3][1];
 		position[3][2] += move[3][2];
-
+		
 	}
 
 	void moveBackward() {
-
+		
 		glm::mat4 move = glm::mat4();
 		move[3][2] = -moveSpeed;
 		move = rotation * move;
-
+		
 		position[3][0] += move[3][0];
 		position[3][1] += move[3][1];
 		position[3][2] += move[3][2];
-
+		
 	}
 
 	void tiltForward() {
-
+		
 		glm::mat4 turn = glm::mat4();
 		turn[1][1] = (float)cos(turnSpeed);
 		turn[1][2] = -1.0f * (float)sin(turnSpeed);
 		turn[2][1] = (float)sin(turnSpeed);
 		turn[2][2] = (float)cos(turnSpeed);
-
+		
 		rotation = rotation * turn;
-
+		
 	}
 
 	void tiltBackward() {
-
+		
 		glm::mat4 turn = glm::mat4();
 		turn[1][1] = (float)cos(turnSpeed);
 		turn[1][2] = (float)sin(turnSpeed);
 		turn[2][1] = -1.0f * (float)sin(turnSpeed);
 		turn[2][2] = (float)cos(turnSpeed);
-
+		
 		rotation = rotation * turn;
-
+		
 	}
 
 	void tiltRight() {
-
+		
 		glm::mat4 turn = glm::mat4();
 		turn[0][0] = (float)cos(turnSpeed);
 		turn[0][1] = (float)sin(turnSpeed);
 		turn[1][0] = -1.0f * (float)sin(turnSpeed);
 		turn[1][1] = (float)cos(turnSpeed);
-
+		
 		rotation = rotation * turn;
-
+		
 	}
 
 	void tiltLeft() {
-
+		
 		glm::mat4 turn = glm::mat4();
 		turn[0][0] = (float)cos(turnSpeed);
 		turn[0][1] = -1.0f * (float)sin(turnSpeed);
 		turn[1][0] = (float)sin(turnSpeed);
 		turn[1][1] = (float)cos(turnSpeed);
-
+		
 		rotation = rotation * turn;
-
+		
 	}
 
 	void changeSpeed() {
-
+		
 		if (moveSpeed <= 10.0f) moveSpeed = 50.0f;
 		else if (moveSpeed <= 50.0f) moveSpeed = 200.0f;
 		else moveSpeed = 10.0f;
-
+		
 	}
 	
 	void gMove () {
@@ -276,8 +276,9 @@ public:
 		gravity[0][2] = -1.0f * (float)sin(turnSpeed);
 		gravity[2][0] = (float)sin(turnSpeed);
 		gravity[2][2] = (float)cos(turnSpeed);
-
+		
 		rotation = rotation * gravity;
+		
 	}
-
+	
 };

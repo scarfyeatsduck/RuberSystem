@@ -10,6 +10,7 @@ uniform mat4 ModelViewProjection;
 uniform vec3 PointLightPosition;
 uniform vec3 PointLightIntensity;
 uniform vec3 AmbientIntensity;
+uniform bool Luminous;
 
 out vec4 color;
 out vec3 position;
@@ -28,8 +29,19 @@ void main(void) {
 	color = vColor;
 	
 	PLP = PointLightPosition;
-	PLI = PointLightIntensity;
-	Amb = AmbientIntensity;
+	
+	if (Luminous) {
+		
+		PLI = vec3(0.0f);
+		Amb = vec3(1.0f);
+		
+	}
+	else {
+		
+		PLI = PointLightIntensity;
+		Amb = AmbientIntensity;
+		
+	}
 	
 	gl_Position = ModelViewProjection * vPosition;
 	

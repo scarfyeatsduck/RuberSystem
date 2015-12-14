@@ -10,59 +10,143 @@ public:
 	
 	char * modelFile;
 	float boundingRadius;
-	const GLuint nVertices = 192;
+	const GLuint nVertices = 180;
 	
 	//glm::vec4 vertex[nVertices];
 	//glm::vec3 normal[nVertices];
 	//glm::vec4 diffuseColorMaterial[nVertices];
 	//GLsizeiptr allocSize;
-
+	
 	glm::mat4 position;
 	glm::mat4 rotation;
+	glm::mat4 orientation;
 	glm::vec3 direction;
 	
-	bool hasTarget;
-	MissileSite * target;
+	int liveCount;
+	bool hasTarget, live;
+	MissileSite * target1;
+	MissileSite * target2;
+	Planet * sun;
+	Planet * planet1;
+	Planet * planet2;
 	
 	float speed = 20.0f;
 	float maxTargetDistance = 1000.0f;
-
-	Missile (char * given, glm::mat4 orientation) {
-
+	
+	Missile (char * given, Planet * sgiven, Planet * pgiven1, Planet * pgiven2, MissileSite * tgiven1, MissileSite * tgiven2) {
+		
 		modelFile = given;
-		//allocSize = sizeof(vertex) + sizeof(normal) + sizeof(diffuseColorMaterial);
 		
-		position = glm::mat4();
-		position[3][0] = orientation[3][0];
-		position[3][1] = orientation[3][1];
-		position[3][2] = orientation[3][2];
+		sun = sgiven;
+		planet1 = pgiven1;
+		planet2 = pgiven2;
+		target1 = tgiven1;
+		target2 = tgiven2;
 		
-		rotation = glm::mat4();
-		rotation[0][0] = orientation[0][0];
-		rotation[0][1] = orientation[0][1];
-		rotation[0][2] = orientation[0][2];
-		rotation[1][0] = orientation[1][0];
-		rotation[1][1] = orientation[1][1];
-		rotation[1][2] = orientation[1][2];
-		rotation[2][0] = orientation[2][0];
-		rotation[2][1] = orientation[2][1];
-		rotation[2][2] = orientation[2][2];
+		hasTarget = false;
+
+	}
+	
+	void init (glm::mat4 pGiven, glm::mat4 rGiven) {
+		
+		liveCount = 0;
+		
+		position = pGiven;
+		
+		rotation = rGiven;
+		
+		orientation = position * rotation;
 		
 		direction = getOut(orientation);
-
+		
+		return;
+		
 	}
 	
 	glm::mat4 getModelMatrix() {
 		
-		return (position * rotation);
+		return (orientation);
 		
 	}
 	
-	void update () {
+	void destroy () {
 		
-		if (hasTarget) {
+		printf("Missile Detonating.\n");
+		
+		position = glm::mat4();
+		rotation = glm::mat4();
+		
+	}
+	
+	bool deathCheck() {
+		
+		if (liveCount >= 2000) {
 			
-			direction = target->getLocation() - getPosition(position);
+			destroy();
+			return false;
+			
+		}
+		if (distance(getPosition(position),planet1->getAt()) <= planet1->boundingRadius) {
+			
+			destroy();
+			return false;
+			
+		}
+		if (distance(getPosition(position),planet2->getAt()) <= planet2->boundingRadius) {
+			
+			destroy();
+			return false;
+			
+		}
+		if (distance(getPosition(position),sun->getAt()) <= sun->boundingRadius) {
+			
+			destroy();
+			return false;
+			
+		}
+		if (distance(getPosition(position),target1->getAt()) <= target1->boundingRadius) {
+			
+			destroy();
+			return false;
+			
+		}
+		if (distance(getPosition(position),target2->getAt()) <= target2->boundingRadius) {
+			
+			destroy();
+			return false;
+			
+		}
+		
+	}
+	
+	bool update () {
+		
+		liveCount++;
+		
+		if (liveCount == 200) {
+			
+			printf("Targeting Missile Site on ");
+			
+			glm::vec3 t1 = target1->getAt();
+			glm::vec3 t2 = target2->getAt();
+			glm::vec3 l = getPosition(position);
+			
+			if (distance(l,t1) < distance(l,t2))
+				printf("Unum.\n");
+			else
+				printf("Duo.\n");
+			
+		}
+		
+		if (liveCount >= 200) {
+			glm::vec3 t1 = target1->getAt();
+			glm::vec3 t2 = target2->getAt();
+			glm::vec3 l = getPosition(position);
+			
+			if (distance(l,t1) < distance(l,t2))
+				direction = normalize(target1->getAt() - getPosition(position));
+			else
+				direction = normalize(target2->getAt() - getPosition(position));
 			
 		}
 		
@@ -70,8 +154,13 @@ public:
 		position[3][1] += direction[1] * speed;
 		position[3][2] += direction[2] * speed;
 		
+		orientation = position * rotation;
+		
+		return deathCheck();
+		
 	}
 	
+	/*
 	bool targetNear (MissileSite * given) {
 		
 		float targetDistance = distance(getPosition(position),getPosition(given->getLocation()));
@@ -80,11 +169,11 @@ public:
 		
 	}
 	
-	void setTarget(Missileite * given) {
+	void setTarget(MissileSite * given) {
 		
 		target = given;
 		hasTarget = true;
 		
 	}
-	
+	*/
 };

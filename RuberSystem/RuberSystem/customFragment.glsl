@@ -18,7 +18,6 @@ void main (void) {
 	vec3 n = normalize(normal);
 	vec3 s = normalize(PLP - position);
 	float i = max(dot(s,n), 0.0f);
-	//float i = abs(dot(s,n));
 	colorBase *= i * PLI;
 	
 	fragValue += colorBase;
